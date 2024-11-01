@@ -1,45 +1,35 @@
 const express = require("express");
-const {adminAuth} = require("./middlewares/auth")
+const compression = require('compression');
+const cookieParser = require("cookie-parser");
+const {adminAuth} = require("./middlewares/auth");
+const {connect} = require("./config/database");
+const router = require("./route");
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-app.all("/test/:user",adminAuth);
+app.use(express.json());  // to make the application recognise json format.
+app.use(cookieParser());
 
 
-app.get("/test/:user",(req,res,next) =>{
-	console.log("1st handler");
-	next();
-	// res.send(JSON.stringify(req.params));
+app.use(compression());
+app.use("/", router);
 
-},
-(req,res,next) =>{
-	console.log("2st handler");
-	// res.send("this is the response from 2nd handler");
-	next();
-},
-(req,res,next) =>{
-	console.log("3rd handler");
-	res.send("response from 3rd handler");
-},
-(req,res,next) =>{
-	console.log(req.query);
-	console.log(req.params.param1);
-	res.send(JSON.stringify(req.params));
-},
+// app.post("/createNew")
 
-);
+// app.use("/", adminAuth, profileRoutes);
 
-app.use("/practice",(req,res) =>{
-	res.send("hello from the practice server");
+
+connect().then(() =>{
+	console.log("Successfully connected to mongodb database");
+	app.listen(PORT,()=>{
+		console.log("Server is listening on port 3000");
+	})
+}).catch((err) =>{
+	console.error("Error in connecting with database");
 });
 
-app.use("/",(req,res) =>{
-	res.send("hello from default server");
-})
 
-
-
-
-app.listen(3000,()=>{
-	console.log("server has started on port 3000");
-});
+// app.listen(3000,()=>{
+// 	console.log("server has started on port 3000");
+// });
 
